@@ -11,7 +11,11 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import encoders
 import shutil
+import urllib3
 from pw import pw #pw.py是邮箱账号密码，不上传到github
+
+# 禁用SSL警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 获取每个子版面页面的文章标题和链接
 def get_article_links(url):
@@ -88,6 +92,27 @@ def rename(download_folder): # 合并PDF文件并重命名为当前日期
 
     print(f"合并完成，文件已保存为：{os.path.join(download_folder, output_filename)}")
 
+def compress_pdf(input_path, output_path):
+    """压缩PDF文件以减小体积，使用PyMuPDF逐页重新渲染为低质量图片"""
+    import fitz
+    
+    src = fitz.open(input_path)
+    dst = fitz.open()
+    
+    for page in src:
+        # 将每页渲染为图片，DPI越低体积越小
+        pix = page.get_pixmap(dpi=120)
+        # 插入新页面，放入压缩后的图片
+        new_page = dst.new_page(width=page.rect.width, height=page.rect.height)
+        new_page.insert_image(new_page.rect, pixmap=pix)
+    
+    dst.save(output_path, deflate=True, garbage=3)
+    dst.close()
+    src.close()
+    original_size = os.path.getsize(input_path)
+    compressed_size = os.path.getsize(output_path)
+    print(f"PDF压缩完成: {original_size/1024/1024:.2f}MB -> {compressed_size/1024/1024:.2f}MB")
+
 def send_email_with_attachment(sender, password, recipient, subject, body, file_path):
     try:
         # 创建一个带附件的 email 消息实例
@@ -153,7 +178,7 @@ def handle_email_and_folders(sender, password, recipient, subject, body, file_pa
 '''
 
 # 需抓取的网页URL  
-url = 'https://rmfyb.chinacourt.org'  
+url = 'https://www.rmfyb.com/'  
   
 # 存放下载PDF的文件夹  
 download_folder = 'downloaded_pdfs'  
@@ -164,6 +189,9 @@ if not os.path.exists(download_folder):
 sent_folder = 'sent_pdfs'  
 if not os.path.exists(sent_folder):  
     os.makedirs(sent_folder)  
+
+# 下载前先清空临时文件夹，避免残留文件被重复合并
+clean_download_folder(download_folder)
 
 # 发送HTTP GET请求  
 response = requests.get(url)  
@@ -191,6 +219,12 @@ for link in pdf_links:
 # 合并PDF文件并重命名为当前日期
 rename(download_folder)
 
+# 压缩PDF文件
+merged_file = os.path.join(download_folder, f"{datetime.now().strftime('%Y-%m-%d')}_merged.pdf")
+compressed_file = f"{datetime.now().strftime('%Y-%m-%d')}_merged_compressed.pdf"
+compress_pdf(merged_file, compressed_file)
+file_path = compressed_file
+
 # 生成邮件正文内容
 body = get_layout_links(url)
 
@@ -198,7 +232,6 @@ body = get_layout_links(url)
 sender, password, recipient = pw()  # 传入发件邮箱、密码、收件邮箱
 recipient = ','.join(recipient)  # 将收件人列表转换为逗号分隔的字符串
 subject = f"{datetime.now().strftime('%Y-%m-%d')}人民法院报"
-file_path = os.path.join(download_folder, f"{datetime.now().strftime('%Y-%m-%d')}_merged.pdf")
 
 
 # 发送并移动文件

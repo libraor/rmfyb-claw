@@ -45,7 +45,7 @@ def get_layout_links(url):
 
 
 # 目标网页URL
-url = 'https://rmfyb.chinacourt.org'
+url = 'https://www.rmfyb.com/'
 get_layout_links(url)
 
 

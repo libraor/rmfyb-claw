@@ -10,3 +10,12 @@ __pycache__/
 downloaded_pdfs/
 sent_pdfs/
 CLAUDE.md
+test.html
+test2.html
+.idea/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.env
