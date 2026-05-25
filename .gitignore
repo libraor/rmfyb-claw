@@ -1,0 +1,12 @@
+
+.DS_Store
+pw.py
+*.pyc
+*.pdf
+.vscode
+.code-workspace
+__pycache__/
+.spec-workflow/
+downloaded_pdfs/
+sent_pdfs/
+CLAUDE.md
