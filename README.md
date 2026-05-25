@@ -26,7 +26,7 @@ python main.py
 
 ## 配置
 
-在项目根目录创建 `pw.py`（已加入 `.gitignore`，不会上传）：
+复制 `pw.example.py` 为 `pw.py`（已加入 `.gitignore`，不会上传），填写真实邮箱凭据：
 
 ```python
 def pw():
@@ -44,7 +44,8 @@ QQ 邮箱需开启 SMTP 服务并使用授权码作为密码。
 rmfyb-all/
 ├── main.py           # 主程序
 ├── mailbody.py       # 邮件正文生成（提取文章标题和链接）
-├── pw.py             # 邮箱凭据（需自行创建）
+├── pw.example.py     # 邮箱凭据示例（复制为 pw.py 后填写真实信息）
+├── pw.py             # 邮箱凭据（需自行创建，已加入 .gitignore）
 ├── requirements.txt  # Python 依赖
 ├── downloaded_pdfs/  # 临时下载目录（发送后自动清空）
 └── sent_pdfs/        # 已发送的 PDF 存档
