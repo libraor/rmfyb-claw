@@ -3,6 +3,7 @@
 pw.py
 *.pyc
 *.pdf
+*.html
 .vscode
 .code-workspace
 __pycache__/
@@ -19,4 +20,4 @@ venv/
 dist/
 build/
 .env
-*.html
+
